@@ -21,7 +21,7 @@ namespace AccountServer
         
         public static IEnumerable<Client> Clients =>
             new Client[] 
-            { };
+            {};
         
     }
 }
