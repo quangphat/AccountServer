@@ -27,6 +27,12 @@ namespace AccountServer.Controllers
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
         }
+        [HttpPost]
+        public async Task<IActionResult> Register([FromBody]RegisterModel model)
+        {
+            var user = model;
+            return Ok();
+        }
         [HttpGet]
         public async Task<IActionResult> Login(string returnUrl)
         {
@@ -100,5 +106,10 @@ namespace AccountServer.Controllers
                 ExternalProviders = providers.ToArray()
             };
         }
+    }
+    public class RegisterModel
+    {
+        public string UserName { get; set; }
+        public string Password { get; set; }
     }
 }
