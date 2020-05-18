@@ -28,6 +28,12 @@ namespace AccountServer.Controllers
             _schemeProvider = schemeProvider;
         }
         [HttpPost]
+        public async Task<IActionResult> Login([FromBody]LoginModel loginModel)
+        {
+            var model = loginModel;
+            return Ok();
+        }
+        [HttpPost]
         public async Task<IActionResult> Register([FromBody]RegisterModel model)
         {
             var user = model;
@@ -110,6 +116,11 @@ namespace AccountServer.Controllers
     public class RegisterModel
     {
         public string UserName { get; set; }
+        public string Password { get; set; }
+    }
+    public class LoginModel
+    {
+        public string Email { get; set; }
         public string Password { get; set; }
     }
 }
