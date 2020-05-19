@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Development": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://my8.account.vn:6002"
+    }
+  }
+}
