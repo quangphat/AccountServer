@@ -10,4 +10,22 @@
 
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="CoreBusiness">
+      <HintPath>..\CoreRepository\CoreBusiness\bin\Debug\netcoreapp2.2\CoreBusiness.dll</HintPath>
+    </Reference>
+    <Reference Include="CoreObject">
+      <HintPath>..\shareobject\CoreObject\bin\Debug\netcoreapp2.2\CoreObject.dll</HintPath>
+    </Reference>
+    <Reference Include="CoreRepository">
+      <HintPath>..\CoreRepository\CoreRepository\bin\Debug\netcoreapp2.2\CoreRepository.dll</HintPath>
+    </Reference>
+    <Reference Include="my8.ShareObject.ESB">
+      <HintPath>..\shareobject\my8.ShareObject\bin\Debug\netcoreapp2.0\my8.ShareObject.ESB.dll</HintPath>
+    </Reference>
+    <Reference Include="my8ViewObject">
+      <HintPath>..\shareobject\my8ViewObject\bin\Debug\netcoreapp2.2\my8ViewObject.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

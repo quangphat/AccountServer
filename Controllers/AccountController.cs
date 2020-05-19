@@ -2,35 +2,83 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AccountServer.Business;
 using AccountServer.Infrastructures;
 using AccountServer.Models;
+using CoreBusiness;
+using IdentityServer4;
+using IdentityServer4.Events;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using my8ViewObject;
 
 namespace AccountServer.Controllers
 {
     [SecurityHeaders]
     [AllowAnonymous]
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IClientStore _clientStore;
+        private readonly IAccountBusiness _bizAccount;
+        private readonly IEventService _events;
         public AccountController(IAuthenticationSchemeProvider schemeProvider,
             IClientStore clientStore,
-            IIdentityServerInteractionService interaction)
+            IAccountBusiness accountBusiness,
+            CurrentProcess process
+            , IEventService eventService
+            , IIdentityServerInteractionService interaction) : base(process)
         {
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
+            _bizAccount = accountBusiness;
+            _events = eventService;
         }
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody]LoginModel loginModel)
+        public async Task<IActionResult> Login([FromBody]LoginModel model)
         {
-            var model = loginModel;
+            var user = await _bizAccount.Login(model.Email, model.Password);
+            if (user != null)
+            {
+                var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                //if (!string.IsNullOrWhiteSpace(obj.Avatar))
+                //    obj.Avatar = Utils.GetAvatarFullPathByAMZ(_blobService.awsService.Host, obj.Avatar);
+                await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.PersonId, user.Email, clientId: context?.ClientId));
+                AuthenticationProperties props = null;
+                if (AccountOptions.AllowRememberLogin && model.RememberLogin)
+                {
+                    props = new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+                    };
+                }
+                var isuser = new IdentityServerUser(user.PersonId)
+                {
+                    DisplayName = user.Email
+                };
+                await HttpContext.SignInAsync(isuser, props);
+
+                //if (context != null)
+                //{
+                //    if (await _clientStore.IsPkceClientAsync(context.ClientId))
+                //    {
+                //        // if the client is PKCE then we assume it's native, so this change in how to
+                //        // return the response is for better UX for the end user.
+                //        return this.LoadingPage("Redirect", model.ReturnUrl);
+                //    }
+
+                //    // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+                //    return Redirect(model.ReturnUrl);
+                //}
+
+            }
             return Ok();
         }
         [HttpPost]
@@ -116,11 +164,6 @@ namespace AccountServer.Controllers
     public class RegisterModel
     {
         public string UserName { get; set; }
-        public string Password { get; set; }
-    }
-    public class LoginModel
-    {
-        public string Email { get; set; }
         public string Password { get; set; }
     }
 }

@@ -2,6 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using AccountServer.Business;
+using CoreBusiness;
+using CoreRepository.Classes;
+using CoreRepository.Classes.Tests;
+using CoreRepository.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -30,7 +35,9 @@ namespace AccountServer
         {
             // uncomment, if you want to add an MVC-based UI
             services.AddControllersWithViews();
-
+            services.AddSingleton<IAccountRepository, AccountRepositoryTest>();
+            services.AddScoped<IAccountBusiness, AccountBusiness>();
+            services.AddScoped<CurrentProcess>();
             var builder = services.AddIdentityServer()
                 .AddInMemoryIdentityResources(Config.Ids)
                 .AddInMemoryApiResources(Config.Apis)
