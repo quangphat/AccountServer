@@ -14,13 +14,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using my8ViewObject;
 
 namespace AccountServer.Controllers
 {
     [SecurityHeaders]
     [AllowAnonymous]
-    public class AccountController : BaseController
+    public class AccountController : Controller
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
@@ -32,7 +31,7 @@ namespace AccountServer.Controllers
             IAccountBusiness accountBusiness,
             CurrentProcess process
             , IEventService eventService
-            , IIdentityServerInteractionService interaction) : base(process)
+            , IIdentityServerInteractionService interaction) //: base(process)
         {
             _interaction = interaction;
             _clientStore = clientStore;
@@ -40,8 +39,23 @@ namespace AccountServer.Controllers
             _bizAccount = accountBusiness;
             _events = eventService;
         }
+        [HttpGet]
+        public async Task<IActionResult> Login(string returnUrl)
+        {
+            // build a model so we know what to show on the login page
+            var vm = await BuildLoginViewModelAsync(returnUrl);
+
+            if (vm.IsExternalLoginOnly)
+            {
+                // we only have one option for logging in and it's an external provider
+                return RedirectToAction("Challenge", "External", new { provider = vm.ExternalLoginScheme, returnUrl });
+            }
+
+            return View();
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody]LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model, string button)
         {
             var user = await _bizAccount.Login(model.Email, model.Password);
             if (user != null)
@@ -87,20 +101,7 @@ namespace AccountServer.Controllers
             var user = model;
             return Ok();
         }
-        [HttpGet]
-        public async Task<IActionResult> Login(string returnUrl)
-        {
-            // build a model so we know what to show on the login page
-            var vm = await BuildLoginViewModelAsync(returnUrl);
 
-            if (vm.IsExternalLoginOnly)
-            {
-                // we only have one option for logging in and it's an external provider
-                return RedirectToAction("Challenge", "External", new { provider = vm.ExternalLoginScheme, returnUrl });
-            }
-
-            return View(vm);
-        }
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);

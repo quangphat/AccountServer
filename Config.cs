@@ -3,6 +3,7 @@
 
 
 using IdentityModel;
+using IdentityServer4;
 using IdentityServer4.Models;
 using System.Collections.Generic;
 
@@ -44,7 +45,7 @@ namespace AccountServer
                     {
                         new Scope
                         {
-                            Name = "role",
+                            Name = "greencode",
                             DisplayName = "Read only access to the calendar"
                         }
                     },
@@ -54,7 +55,34 @@ namespace AccountServer
         
         public static IEnumerable<Client> Clients =>
             new Client[] 
-            {};
+            {
+                    new Client
+                {
+                    ClientId = "greencode",
+                    ClientSecrets = { new Secret("secret".Sha256()) },
+
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RequireConsent = false,
+                    RequirePkce = true,
+
+                    // where to redirect to after login
+                    RedirectUris = { "http://localhost:5002/signin-oidc" },
+
+                    // where to redirect to after logout
+                    PostLogoutRedirectUris = { "http://localhost:5002/signout-callback-oidc" },
+
+                    AllowedScopes = new List<string>
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        "greencode"
+                        //"account",
+                        //"account.read"
+                    },
+
+                    AllowOfflineAccess = true
+                }
+            };
         
     }
 }

@@ -6,7 +6,6 @@ using IdentityServer4;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
-using my8ViewObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
